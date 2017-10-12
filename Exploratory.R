@@ -7,7 +7,7 @@ library(tidyr)
 
 setwd('C:/JuvRockfish/')
 ##Read in catch data
-Catch = read.csv('Gelatinous_catch.csv')
+Catch = read.csv('All_juv_catch.csv')
 colnames(Catch)[1] = 'CRUISE'
 
 ##Need to sum heteropods, carinaria, and pyerotrachea catches
@@ -16,20 +16,54 @@ Catch = Catch %>% mutate(COMMON_NAME = COMMON_NAME %>% replace(COMMON_NAME=='CAR
 Catch = Catch %>% group_by(CRUISE, HAUL_NO, SPECIES, COMMON_NAME) %>% summarise(TOTAL_NO = sum(TOTAL_NO))
 
 
+##Read in catch groups from John
+Spp_groups = read.csv('JuvRockfish_species_groups.csv')
+
+
+
+
 ##Read in all trawls
 Hauls = read.csv('Haul_data.csv')
 colnames(Hauls)[1] = 'CRUISE'
-##CTD data
+
+
+
+
+
+##Station data
+Station = read.csv('STANDARD_STATIONS.csv')
+colnames(Station)[1] = 'STATION'
+
+##Merge Haul and station data
+Hauls = inner_join(Hauls, Station)
+
+##Subset hauls to only those in the core area
+Hauls = subset(Hauls, STRATA=='C')
+
 
 
 ##Mutate the Catch data from long to wide
 Catch2 = spread(Catch[,c(1,2,4,5)], COMMON_NAME, TOTAL_NO)
 
-##Merge in haul data
+
+
+##Merge catch and  haul data
 Catch_haul = right_join(Hauls, Catch2)
 
 #Remove anything before 1990
 Catch_haul = subset(Catch_haul, YEAR>1989)
+
+
+
+#New group 1: time 1990-2001, 2012-2017 - core area only, but 2nd option to 
+#consider would be all areas, 2012-2017 only …
+
+
+#New group 2: Time 2005-2017 only, but let's try both core AND if possible 
+#whole survey area (exclude far north, only sampled since 2013)_
+
+
+
 
 
 ##Check when sampling of some species stopped/startes

@@ -57,4 +57,5 @@ Select JUV_HAUL.CRUISE,
  from JUV_HAUL			
 where PROBLEM not in (4,5,6,7,8)
    and not (PROBLEM=0 and STANDARD_STATION=0)
+   and STATION is not null
 
