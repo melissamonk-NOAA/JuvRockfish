@@ -5,9 +5,9 @@
 library(dplyr)
 library(tidyr)
 
-setwd('M:/Juvenile_rockfish_cruise/')
+setwd('C:/JuvRockfish/')
 ##Read in catch data
-Catch = read.csv('M:/Juvenile_rockfish_cruise/Gelatinous_catch.csv')
+Catch = read.csv('Gelatinous_catch.csv')
 colnames(Catch)[1] = 'CRUISE'
 
 ##Need to sum heteropods, carinaria, and pyerotrachea catches
@@ -17,7 +17,7 @@ Catch = Catch %>% group_by(CRUISE, HAUL_NO, SPECIES, COMMON_NAME) %>% summarise(
 
 
 ##Read in all trawls
-Hauls = read.csv('M:/Juvenile_rockfish_cruise/Haul_data.csv')
+Hauls = read.csv('Haul_data.csv')
 colnames(Hauls)[1] = 'CRUISE'
 ##CTD data
 
@@ -60,11 +60,10 @@ N_hauls = Hauls %>%
 
 write.csv(N_hauls, "N_hauls.csv")
 
-
+N_hauls = as.data.frame(N_hauls)
 ##Remove stations sampled in fewer than 5 years
 
-
-
+N_hauls1 = N_hauls[colSums(N_hauls==0)<=4,]
 
 
 
