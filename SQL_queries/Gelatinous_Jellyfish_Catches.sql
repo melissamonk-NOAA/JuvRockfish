@@ -53,9 +53,12 @@ Select JUV_HAUL.CRUISE,
 	   JUV_HAUL.SWEEP,
 	   JUV_HAUL.BOTTOM_DEPTH,
 	   JUV_HAUL.PROBLEM,
-	   JUV_HAUL.STANDARD_STATION  
+	   JUV_HAUL.STANDARD_STATION  ,
+	   JUV_HAUL.NOTES as HAUL_NOTE
  from JUV_HAUL			
-where PROBLEM not in (4,5,6,7,8)
+where PROBLEM not in (3,4,5,6,7,8,9)
    and not (PROBLEM=0 and STANDARD_STATION=0)
    and STATION is not null
 
+--PROBLEM not in (4,5,6,7,8)
+--   and not (PROBLEM=0 and STANDARD_STATION=0)
