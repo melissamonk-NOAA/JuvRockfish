@@ -92,13 +92,40 @@ Catch_haul = subset(Catch_haul, rowsums>0)
 #Replace all NA's with 0
 Catch_haul[is.na(Catch_haul)] = 0
 
-
 ##Limit to 1990-2001
-Catch_haul_early = subset(Catch_haul, YEAR<2002)
+Catch_haul_core = subset(Catch_haul, YEAR<2002)
+
+##Count stations by year again
+N_hauls_core = Catch_haul_core %>% 
+  count(YEAR, STATION) %>%
+  spread(STATION, n, fill=0)
+
+N_hauls_core = as.data.frame(N_hauls_core)
 
 
+##Now get the average of each species within a year/station combo
+
+
+
+
+##Scale species to the largest catch
+
+
+
+
+
+
+
+
+
+
+
+###########################################################################
+## Analyses
+##
+##########################################################################
 ##Data for the analyses - exclude Euphausids
-Catch_haul_early = mutate(Catch_haul_early,
+Catch_haul_early = mutate(Catch_haul_core,
                     Year_station = paste(YEAR, STATION, sep="."))
 One_clust_early = Catch_haul_early[,c(39,22,24:37)]
 
@@ -111,7 +138,16 @@ One_clust_early = One_clust_early[,-1]
 
 ## Change the metric, method, and stand
 clust1 = agnes(One_clust_early,diss=FALSE, metric = "euclidean", method = "ward", stand = FALSE)
-x11(); plot(clust1, cex=.7)
+x11(); plot(clust1)
+
+##do MDS for this
+
+mds1 = metaMDS(One_clust_early, dist="euclidean")
+plot(mds1)
+
+
+
+
 
 
 ##One cluster analysis for each station over all years
@@ -129,26 +165,46 @@ for(i in 1:length(Stations)) {
 
    clust = agnes(Station, diss=FALSE, metric = "euclidean", method = "ward", stand = FALSE)
        plot(clust,  main = Stations[i], which.plots = 2)
-    
+
+           
 }    
+
+
+
+
+
+
+
 
 ##One cluster analysis for each year, using all stations
 Years = unique(Catch_haul$YEAR)
-New_plot = c(7,13)
-x11(); par(mfrow = c(3,2))
+New_plot = c(3,5)#c(7,13)
+x11(); par(mfrow = c(2,2))
 
-for(i in 1:length(Years)) {
-  if(i %in% New_plot){ x11(); par(mfrow = c(3,2))}
+for(i in 1:4){#length(Years)) {
+  if(i %in% New_plot){ x11(); par(mfrow = c(2,2))}
   
   Year_dat = subset(Catch_haul, YEAR == Years[i])
   Year_dat = as.data.frame(Year_dat[,c(8,22,24:37)] %>% group_by(STATION) %>% summarise_all(funs(mean)))
   rownames(Year_dat) = Year_dat$STATION
   Year_dat = Year_dat[,-1]
   
-  clust = agnes(Year_dat, diss=FALSE, metric = "euclidean", method = "ward", stand = TRUE)
+  Year_dat[Year_dat>0]=1
+  Year_dat_jac = vegdist(Year_dat, dist="jaccard")
+  clust = agnes(Year_dat_jac, diss=T, metric = "euclidian", stand = TRUE)
   plot(clust,  main = Years[i], which.plots = 2)
   
+  ##do MDS for this
+  mds1 = metaMDS(Year_dat_jac)
+  plot(mds1)
+ # reg.arrow <- scores(mds1,choices=1:3,display="sp",scaling=2)
+  points(mds1,display="sites",pch=19)
+ # arrows(0,0,reg.arrow[,1],reg.arrow[,2],length=0,lty=1,cex=3,lwd=2.5,col="black")
+  text(mds1,display="sites") 
+  
 }    
+
+##do MDS for this
 
 
 
@@ -158,8 +214,17 @@ for(i in 1:length(Years)) {
   
   
 ###Look at presence absence matrix of stations to see if merging is appropriate
+##Change anything >0 to 1
 
-
+Catch_haul_pa = One_clust_early
+Catch_haul_pa[Catch_haul_pa>0]=1
+ 
+Test_jac = vegdist(Catch_haul_pa, dist="jaccard")
+##do MDS for this
+mds_All1 = metaMDS(Test_jac, distance="euclidian", trymax = 100, k=8) #, previous.best = mds_All)
+plot(mds_All1, display='sites',type='t', cex=.4)
+#points(mds_All1,display="sites",pch=19)
+#text(mds_All1,display="sites", cex=.6)
 
 
 
